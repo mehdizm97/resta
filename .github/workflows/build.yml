@@ -26,7 +26,8 @@ jobs:
         run: |
           npm install -g @capacitor/cli @capacitor/core
           npm install
-          npx cap init --web-dir .
+          npm install @capacitor/android
+          npx cap init "باشگاه رستا" "com.restaclub.app" --web-dir . --yes
           npx cap add android
           npx cap sync android
           cd android
