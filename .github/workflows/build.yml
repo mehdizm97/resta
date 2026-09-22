@@ -22,12 +22,12 @@ jobs:
         with:
           node-version: 18
 
-      - name: Configure Gradle Cache & Environment
+      - name: Prepare Environment & Gradle Properties
         run: |
-          # تنظیم متغیرهای محیطی برای جلوگیری از خطاهای حافظه و فایل‌سیستم در گریدل
-          mkdir -p ~/.gradle
-          echo "org.gradle.daemon=false" >> ~/.gradle/gradle.properties
-          echo "org.gradle.jvmargs=-Xmx3072m -Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError" >> ~/.gradle/gradle.properties
+          mkdir -p android/gradle
+          echo "org.gradle.jvmargs=-Xmx3072m -Dfile.encoding=UTF-8 -XX:+UseG1GC" > android/gradle.properties
+          echo "android.useAndroidX=true" >> android/gradle.properties
+          echo "android.enableJetifier=true" >> android/gradle.properties
 
       - name: Install Dependencies & Build
         run: |
@@ -35,21 +35,20 @@ jobs:
           npm install
           npm install @capacitor/android@latest
           
-          # ساخت خودکار پوشه www و انتقال فایل‌های وب از ریشه
+          # ساخت پوشه www و انتقال فایل‌های وب
           mkdir -p www
           cp -r *.html *.js *.css www/ 2>/dev/null || true
           
-          # اضافه کردن پلتفرم اندروید و سینک کردن
           npx cap add android
           npx cap sync android
           
-          # تنظیم دسترسی اجرای گريدل و شروع فرآیند کامپایل بدون کش‌های مخرب
           cd android
           chmod +x gradlew
-          ./gradlew clean assembleDebug --no-daemon --refresh-dependencies
+          # استفاده از دستور آفلاین یا پاکسازی مقطعی برای جلوگیری از خطای jar
+          ./gradlew clean assembleDebug --offline || ./gradlew assembleDebug --refresh-dependencies
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: upload-artifact@v4
         with:
           name: app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
