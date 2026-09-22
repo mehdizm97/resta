@@ -28,15 +28,19 @@ jobs:
           npm install
           npm install @capacitor/android
           
-          # ساخت خودکار پوشه www و انتقال فایل‌ها به داخل آن
+          # ساخت پوشه www و انتقال فایل‌ها
           mkdir -p www
           cp -r *.html *.js *.css www/ 2>/dev/null || true
           
           npx cap add android
           npx cap sync android
+          
           cd android
+          # پاکسازی کش گادل برای رفع خطای فایل Jar
+          rm -rf ~/.gradle/caches/
+          
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --refresh-dependencies
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
