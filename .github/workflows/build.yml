@@ -24,6 +24,10 @@ jobs:
 
       - name: Install Dependencies & Build
         run: |
+          # پاکسازی کامل کش گادل پیش از هر اقدامی
+          rm -rf ~/.gradle/caches/
+          rm -rf ~/.gradle/wrapper/
+          
           npm install -g @capacitor/cli @capacitor/core
           npm install
           npm install @capacitor/android
@@ -36,9 +40,6 @@ jobs:
           npx cap sync android
           
           cd android
-          # پاکسازی کش گادل برای رفع خطای فایل Jar
-          rm -rf ~/.gradle/caches/
-          
           chmod +x gradlew
           ./gradlew assembleDebug --refresh-dependencies
 
