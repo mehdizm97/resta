@@ -1,1 +1,7 @@
 
+{
+  "appId": "com.restaclub.app",
+  "appName": "باشگاه رستا",
+  "webDir": ".",
+  "bundledWebRuntime": false
+}
