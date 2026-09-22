@@ -22,12 +22,9 @@ jobs:
         with:
           node-version: 18
 
-      - name: Prepare Environment & Gradle Properties
-        run: |
-          mkdir -p android/gradle
-          echo "org.gradle.jvmargs=-Xmx3072m -Dfile.encoding=UTF-8 -XX:+UseG1GC" > android/gradle.properties
-          echo "android.useAndroidX=true" >> android/gradle.properties
-          echo "android.enableJetifier=true" >> android/gradle.properties
+      # استفاده از اکشن رسمی گریدل برای مدیریت صحیح کش و وابستگی‌ها
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Install Dependencies & Build
         run: |
@@ -35,20 +32,22 @@ jobs:
           npm install
           npm install @capacitor/android@latest
           
-          # ساخت پوشه www و انتقال فایل‌های وب
+          # آماده‌سازی پوشه www و انتقال فایل‌های وب
           mkdir -p www
           cp -r *.html *.js *.css www/ 2>/dev/null || true
           
           npx cap add android
           npx cap sync android
           
+          # اجرای کامپایل اندروید با تنظیمات پایدار
           cd android
           chmod +x gradlew
-          # استفاده از دستور آفلاین یا پاکسازی مقطعی برای جلوگیری از خطای jar
-          ./gradlew clean assembleDebug --offline || ./gradlew assembleDebug --refresh-dependencies
+          ./gradlew assembleDebug --no-daemon
+        env:
+          CI: true
 
       - name: Upload APK Artifact
-        uses: upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
