@@ -22,26 +22,31 @@ jobs:
         with:
           node-version: 18
 
+      - name: Configure Gradle Cache & Environment
+        run: |
+          # تنظیم متغیرهای محیطی برای جلوگیری از خطاهای حافظه و فایل‌سیستم در گریدل
+          mkdir -p ~/.gradle
+          echo "org.gradle.daemon=false" >> ~/.gradle/gradle.properties
+          echo "org.gradle.jvmargs=-Xmx3072m -Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError" >> ~/.gradle/gradle.properties
+
       - name: Install Dependencies & Build
         run: |
-          # پاکسازی کامل کش گادل پیش از هر اقدامی
-          rm -rf ~/.gradle/caches/
-          rm -rf ~/.gradle/wrapper/
-          
           npm install -g @capacitor/cli @capacitor/core
           npm install
-          npm install @capacitor/android
+          npm install @capacitor/android@latest
           
-          # ساخت پوشه www و انتقال فایل‌ها
+          # ساخت خودکار پوشه www و انتقال فایل‌های وب از ریشه
           mkdir -p www
           cp -r *.html *.js *.css www/ 2>/dev/null || true
           
+          # اضافه کردن پلتفرم اندروید و سینک کردن
           npx cap add android
           npx cap sync android
           
+          # تنظیم دسترسی اجرای گريدل و شروع فرآیند کامپایل بدون کش‌های مخرب
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --refresh-dependencies
+          ./gradlew clean assembleDebug --no-daemon --refresh-dependencies
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
