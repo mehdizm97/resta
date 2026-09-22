@@ -28,6 +28,10 @@ jobs:
           npm install
           npm install @capacitor/android
           npx cap add android
+          # کپی کردن فایل‌های وب از ریشه به پوشه اندروید
+          mkdir -p android/app/src/main/assets/public
+          cp -r *.html *.js *.css 2>/dev/null || true
+          cp -r *.html android/app/src/main/assets/public/ 2>/dev/null || true
           npx cap sync android
           cd android
           chmod +x gradlew
